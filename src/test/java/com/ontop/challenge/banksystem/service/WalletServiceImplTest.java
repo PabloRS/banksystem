@@ -1,0 +1,58 @@
+package com.ontop.challenge.banksystem.service;
+
+import com.ontop.challenge.banksystem.exceptionhandler.UserNotFoundException;
+import com.ontop.challenge.banksystem.model.BalanceResponse;
+import com.ontop.challenge.banksystem.model.BankInfo;
+import com.ontop.challenge.banksystem.repository.BankInfoRepository;
+import com.ontop.challenge.banksystem.service.impl.WalletServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class WalletServiceImplTest {
+
+    private BankInfoRepository bankInfoRepository;
+    private WalletService walletService;
+
+    @BeforeEach
+    public void setUp() {
+        bankInfoRepository = mock(BankInfoRepository.class);
+        walletService = new WalletServiceImpl(bankInfoRepository);
+    }
+
+    @Test
+    public void testBalanceUserExist() {
+        String user_id = "123";
+        when(bankInfoRepository.findByUserId(user_id)).thenReturn(Optional.of(stubBankInfo()));
+
+        BalanceResponse response = walletService.getBalance(user_id);
+
+        assertNotNull(response);
+        assertEquals(user_id, response.getUser_id());
+    }
+
+    @Test
+    public void testBalanceUserNotExist() {
+        String user_id = "000";
+        when(bankInfoRepository.findByUserId(user_id)).thenThrow(UserNotFoundException.class);
+
+        assertThrows(UserNotFoundException.class, () -> walletService.getBalance(user_id));
+    }
+
+    private BankInfo stubBankInfo() {
+        BankInfo bankInfo = new BankInfo();
+        bankInfo.setUserId("123");
+        bankInfo.setFirstName("Pablo");
+        bankInfo.setLastName("Ramirez");
+        bankInfo.setBankName("citi");
+        bankInfo.setAccountNumber("1111");
+        bankInfo.setNiNumber("3423");
+        bankInfo.setRoutingNumber("92929");
+        return bankInfo;
+    }
+}

@@ -5,24 +5,25 @@ import com.ontop.challenge.banksystem.model.BalanceResponse;
 import com.ontop.challenge.banksystem.model.BankInfo;
 import com.ontop.challenge.banksystem.repository.BankInfoRepository;
 import com.ontop.challenge.banksystem.service.WalletService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class WalletServiceImpl implements WalletService {
 
-    @Autowired
-    BankInfoRepository bankInfoRepository;
+    private final BankInfoRepository bankInfoRepository;
 
     @Value("${wallet.transactions.fee}")
     private BigDecimal fee;
 
     RestTemplate restTemplate = new RestTemplate();
+
+    public WalletServiceImpl(BankInfoRepository bankInfoRepository) {
+        this.bankInfoRepository = bankInfoRepository;
+    }
 
     @Override
     public BalanceResponse getBalance(String user_id) {
