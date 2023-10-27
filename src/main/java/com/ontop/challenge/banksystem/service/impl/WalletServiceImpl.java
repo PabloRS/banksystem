@@ -36,7 +36,19 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public BankInfo configureBankInfo(BankInfo bankInfo) {
         BankInfo response = bankInfoRepository.findByUserIdAndAccountNumber(bankInfo.getUserId(), bankInfo.getAccountNumber())
-                .orElse(bankInfoRepository.save(bankInfo));
-        return response;
+                .orElseGet(() -> bankInfoRepository.save(bankInfo));
+        return updateBankInfo(response, bankInfo);
+    }
+
+    private BankInfo updateBankInfo(BankInfo currentInfo, BankInfo bankInfoUpdate) {
+        if(!currentInfo.equals(bankInfoUpdate)) {
+            currentInfo.setFirstName(bankInfoUpdate.getFirstName());
+            currentInfo.setLastName(bankInfoUpdate.getLastName());
+            currentInfo.setRoutingNumber(bankInfoUpdate.getRoutingNumber());
+            currentInfo.setNiNumber(bankInfoUpdate.getNiNumber());
+            currentInfo.setBankName(bankInfoUpdate.getBankName());
+            bankInfoRepository.save(currentInfo);
+        }
+        return currentInfo;
     }
 }

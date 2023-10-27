@@ -44,12 +44,50 @@ public class WalletServiceImplTest {
         assertThrows(UserNotFoundException.class, () -> walletService.getBalance(user_id));
     }
 
+    @Test
+    public void testConfigureBankInfo() {
+        BankInfo configureInfo = stubBankInfo();
+        when(bankInfoRepository.save(configureInfo)).thenReturn(stubBankInfo());
+
+        BankInfo response = walletService.configureBankInfo(configureInfo);
+        assertNotNull(response);
+        assertTrue(response.equals(configureInfo));
+    }
+
+    @Test
+    public void testUpdateBankInfo() {
+        BankInfo configureInfo = stubBankInfo();
+        configureInfo.setBankName("santander");
+
+        when(bankInfoRepository.findByUserIdAndAccountNumber(configureInfo.getUserId(), configureInfo.getAccountNumber()))
+                .thenReturn(Optional.of(stubBankInfo()));
+
+        when(bankInfoRepository.save(configureInfo)).thenReturn(stubBankInfoUpdate());
+
+        BankInfo infoUpdated = walletService.configureBankInfo(configureInfo);
+
+        assertNotNull(infoUpdated);
+        assertTrue(infoUpdated.getBankName().equals("santander"));
+    }
+
     private BankInfo stubBankInfo() {
         BankInfo bankInfo = new BankInfo();
         bankInfo.setUserId("123");
         bankInfo.setFirstName("Pablo");
         bankInfo.setLastName("Ramirez");
         bankInfo.setBankName("citi");
+        bankInfo.setAccountNumber("1111");
+        bankInfo.setNiNumber("3423");
+        bankInfo.setRoutingNumber("92929");
+        return bankInfo;
+    }
+
+    private BankInfo stubBankInfoUpdate() {
+        BankInfo bankInfo = new BankInfo();
+        bankInfo.setUserId("123");
+        bankInfo.setFirstName("Pablo");
+        bankInfo.setLastName("Ramirez");
+        bankInfo.setBankName("santander");
         bankInfo.setAccountNumber("1111");
         bankInfo.setNiNumber("3423");
         bankInfo.setRoutingNumber("92929");
