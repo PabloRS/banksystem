@@ -6,7 +6,6 @@ import com.ontop.challenge.banksystem.model.BankInfo;
 import com.ontop.challenge.banksystem.model.Transactions;
 import com.ontop.challenge.banksystem.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;

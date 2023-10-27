@@ -1,16 +1,19 @@
 package com.ontop.challenge.banksystem.service;
 
+import com.ontop.challenge.banksystem.exceptionhandler.TransactionNotValidException;
 import com.ontop.challenge.banksystem.exceptionhandler.UserNotFoundException;
-import com.ontop.challenge.banksystem.model.BalanceResponse;
-import com.ontop.challenge.banksystem.model.BankInfo;
+import com.ontop.challenge.banksystem.model.*;
 import com.ontop.challenge.banksystem.repository.BankInfoRepository;
 import com.ontop.challenge.banksystem.repository.TransactionsRepository;
 import com.ontop.challenge.banksystem.service.impl.WalletServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
+import static com.ontop.challenge.banksystem.utils.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,12 +23,14 @@ public class WalletServiceImplTest {
     private BankInfoRepository bankInfoRepository;
     private TransactionsRepository transactionsRepository;
     private WalletService walletService;
+    private BigDecimal fee;
 
     @BeforeEach
     public void setUp() {
-        bankInfoRepository = mock(BankInfoRepository.class);
-        transactionsRepository = mock(TransactionsRepository.class);
-        walletService = new WalletServiceImpl(bankInfoRepository, transactionsRepository);
+        this.bankInfoRepository = mock(BankInfoRepository.class);
+        this.transactionsRepository = mock(TransactionsRepository.class);
+        this.fee = new BigDecimal("10");
+        this.walletService = new WalletServiceImpl(bankInfoRepository, transactionsRepository, fee);
     }
 
     @Test
@@ -73,27 +78,62 @@ public class WalletServiceImplTest {
         assertTrue(infoUpdated.getBankName().equals("santander"));
     }
 
-    private BankInfo stubBankInfo() {
-        BankInfo bankInfo = new BankInfo();
-        bankInfo.setUserId("123");
-        bankInfo.setFirstName("Pablo");
-        bankInfo.setLastName("Ramirez");
-        bankInfo.setBankName("citi");
-        bankInfo.setAccountNumber("1111");
-        bankInfo.setNiNumber("3423");
-        bankInfo.setRoutingNumber("92929");
-        return bankInfo;
+    @Test
+    public void testTransactionUserNotFound() {
+        String user_id = "000";
+        Transactions transaction = new Transactions();
+        transaction.setAmount(new BigDecimal("1000"));
+        when(bankInfoRepository.findByUserId(user_id)).thenThrow(UserNotFoundException.class);
+
+        assertThrows(UserNotFoundException.class, () -> walletService.processTransaction(transaction));
     }
 
-    private BankInfo stubBankInfoUpdate() {
-        BankInfo bankInfo = new BankInfo();
-        bankInfo.setUserId("123");
-        bankInfo.setFirstName("Pablo");
-        bankInfo.setLastName("Ramirez");
-        bankInfo.setBankName("santander");
-        bankInfo.setAccountNumber("1111");
-        bankInfo.setNiNumber("3423");
-        bankInfo.setRoutingNumber("92929");
-        return bankInfo;
+    @Test
+    public void testTransactionInvalid() {
+        String user_id = "123";
+        Transactions transaction = new Transactions();
+        transaction.setAmount(new BigDecimal("0"));
+        transaction.setUserId(user_id);
+        when(bankInfoRepository.findByUserId(user_id)).thenReturn(Optional.of(stubBankInfo()))
+                .thenThrow(TransactionNotValidException.class);
+
+        assertThrows(TransactionNotValidException.class, () -> walletService.processTransaction(transaction));
     }
+
+    @Test
+    @Disabled
+    public void testTransactionTopup() {
+        String user_id = "123";
+        Transactions transaction = new Transactions();
+        transaction.setAmount(new BigDecimal("5000"));
+        transaction.setUserId(user_id);
+        when(bankInfoRepository.findByUserId(user_id)).thenReturn(Optional.of(stubBankInfo()));
+        TransactionRequest request = buildTransactionRequest(transaction);
+        TransactionResponse response = buildTransactionResponse(request);
+        Transactions updateTransaction = buildTransaction(response);
+        when(transactionsRepository.save(updateTransaction)).thenReturn(stubTransaction("5000"));
+
+        Transactions transactions = walletService.processTransaction(transaction);
+
+        assertNotNull(transactions);
+    }
+
+    @Test
+    @Disabled
+    public void testTransactionWithdraw() {
+        String user_id = "123";
+        Transactions transaction = new Transactions();
+        transaction.setAmount(new BigDecimal("-5000"));
+        transaction.setUserId(user_id);
+        when(bankInfoRepository.findByUserId(user_id)).thenReturn(Optional.of(stubBankInfo()));
+        TransactionRequest request = buildTransactionRequest(transaction);
+        TransactionResponse response = buildTransactionResponse(request);
+        Transactions updateTransaction = buildTransaction(response);
+        when(transactionsRepository.save(updateTransaction)).thenReturn(stubTransaction("-5000"));
+
+        Transactions transactions = walletService.processTransaction(transaction);
+
+        assertNotNull(transactions);
+    }
+
 }

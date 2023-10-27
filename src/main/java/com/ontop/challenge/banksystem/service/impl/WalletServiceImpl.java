@@ -23,16 +23,16 @@ public class WalletServiceImpl implements WalletService {
 
     private final BankInfoRepository bankInfoRepository;
     private final TransactionsRepository transactionsRepository;
-
-    @Value("${wallet.transactions.fee}")
-    private BigDecimal fee;
+    private final BigDecimal fee;
 
     RestTemplate restTemplate = new RestTemplate();
 
     public WalletServiceImpl(BankInfoRepository bankInfoRepository,
-                             TransactionsRepository transactionsRepository) {
+                             TransactionsRepository transactionsRepository,
+                             @Value("${wallet.transactions.fee}") BigDecimal fee) {
         this.bankInfoRepository = bankInfoRepository;
         this.transactionsRepository = transactionsRepository;
+        this.fee = fee;
     }
 
     @Override
