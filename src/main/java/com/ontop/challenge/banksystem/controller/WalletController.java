@@ -30,12 +30,11 @@ public class WalletController {
     }
 
     @PostMapping("/transactions")
-    public ResponseEntity<Transactions> walletTransactions(@RequestBody Transactions transactions) {
+    public Transactions walletTransactions(@RequestBody Transactions transactions) {
         if(Objects.isNull(transactions.getAmount()) || Objects.isNull(transactions.getUserId())) {
-            throw new ValidationException("User id and amount cannot be empty");
+            throw new ValidationException("amount and userId must not be null");
         }
-        System.out.println(transactions);
-        return null;
+        return walletService.processTransaction(transactions);
     }
 
     @PostMapping("/payments")

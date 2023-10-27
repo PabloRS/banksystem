@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Document("transactions")
@@ -19,7 +20,7 @@ public class Transactions {
     String id;
     String transactionId;
     String userId;
-    Integer amount;
+    BigDecimal amount;
     Status status;
     @Indexed(name = "creationDate", direction = IndexDirection.DESCENDING)
     Instant creationDate;

@@ -4,6 +4,7 @@ import com.ontop.challenge.banksystem.exceptionhandler.UserNotFoundException;
 import com.ontop.challenge.banksystem.model.BalanceResponse;
 import com.ontop.challenge.banksystem.model.BankInfo;
 import com.ontop.challenge.banksystem.repository.BankInfoRepository;
+import com.ontop.challenge.banksystem.repository.TransactionsRepository;
 import com.ontop.challenge.banksystem.service.impl.WalletServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,12 +18,14 @@ import static org.mockito.Mockito.when;
 public class WalletServiceImplTest {
 
     private BankInfoRepository bankInfoRepository;
+    private TransactionsRepository transactionsRepository;
     private WalletService walletService;
 
     @BeforeEach
     public void setUp() {
         bankInfoRepository = mock(BankInfoRepository.class);
-        walletService = new WalletServiceImpl(bankInfoRepository);
+        transactionsRepository = mock(TransactionsRepository.class);
+        walletService = new WalletServiceImpl(bankInfoRepository, transactionsRepository);
     }
 
     @Test
