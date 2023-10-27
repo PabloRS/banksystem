@@ -47,7 +47,7 @@ public class TestUtils {
         Transactions transaction = new Transactions();
         transaction.setTransactionId("121212");
         transaction.setUserId("123");
-        transaction.setAmount(new BigDecimal(amount));
+        transaction.setAmount(applyFee(amount));
         transaction.setStatus(Status.COMPLETED);
         transaction.setCreationDate(Instant.now());
         return transaction;
