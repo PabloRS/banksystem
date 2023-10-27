@@ -7,5 +7,9 @@
 # Build project
 
 - Clone repository and import to IntelliJ.
-- execute in console 'mvn clean install'
-- Run main class 'BanksystemApplication'
+- execute in console 'mvn clean install'.
+- Run main class 'BanksystemApplication'.
+- Request through postman.
+
+# Diagram of the system can be found on: 
+- src/main/resources/static/SystemDiagram.png
